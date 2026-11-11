@@ -1,0 +1,6 @@
+*.mp4
+__pycache__/
+.venv/
+videos
+*.srt
+subprocess_01.py

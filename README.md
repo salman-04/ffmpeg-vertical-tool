@@ -2,7 +2,6 @@
 
 A Python CLI that converts any horizontal video into a 9:16 vertical video with a blurred background — the TikTok / Reels / Shorts look.
 
-![demo](demo.png)
 
 ## What it does
 

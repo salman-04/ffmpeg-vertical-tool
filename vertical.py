@@ -1,55 +1,57 @@
-
-"""Imports Modules Section"""
 import argparse
 import subprocess
 import os
 import sys
 
-"""if not exist -> print error, sys.exit(1)"""
-
-def check_input(path):
-    if not os.path.exists(path):
-        print(f"File is not found {path}")
+#check file if not exist then give msg (file not exist) and stop the process 
+def check_file(path):
+    if not os.path.join(path):
+        print(f"File doesn't found")
         sys.exit(1)
 
-""" Take the input and output data , filter_complex, use try execption , print error if exist"""
+#using filter on our video , ffmpeg command , run it 
+def vertical_clips(input_video, output_video):
 
-def make_vertical(input_path, output_path):
-
-    filter_string = (
+    #use filter_complex command with instruction for to set blur background and convert to 9:16 etc
+    filter_apply = (
         "[0:v]split=2[bg][fg];"
         "[bg]scale=1080:1920:force_original_aspect_ratio=increase,"
-        "crop=1080:1920,gblur=sigma=50[bgblur];"
+        "crop=1080:1920, gblur=sigma=50[bgblur];"
         "[fg]scale=1080:-1[fgscaled];"
         "[bgblur][fgscaled]overlay=(W-w)/2:(H-h)/2[out]"
     )
 
-    args = [
+    #ffmpeg command list to use in subprocess.run()
+    running_command = [
         "ffmpeg",
-        "-i", input_path,
-        "-filter_complex", filter_string,
+        "-i", input_video,
+        "-filter_complex", filter_apply,
         "-map", "[out]",
         "-c:v", "libx264",
         "-crf", "23",
         "-c:a", "aac",
-        output_path
+        output_video
+
     ]
 
+    #try to check if no error then run 
     try:
-        subprocess.run(args, check=True, capture_output=True, text=True)
+        subprocess.run(running_command, check=True, capture_output=True, text=True)
+
+    #if it having some errors process stop and give error msg
     except subprocess.CalledProcessError as e:
-        print("FFMPEG failed, error:")
-        print(e.stderr)
+        print("Something went wrong!")
+        print(e)
         sys.exit(1)
 
-    print("Done -> ", output_path )
-
-"""Run the project if __name__ == __main__ """
+    print("Done ->", output_video)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Make a virtical video with 50 percent blurred background")
-    parser.add_argument("input", help="input file video")
-    parser.add_argument("output", help="output file video")
+
+    #take CLI from user like> python video_utils.py input.mp4 output.mp4
+    parser = argparse.ArgumentParser(description="This CLI module is use to convert 16:9 video into 9:16")
+    parser.add_argument("input", help="input video file")
+    parser.add_argument("output", help="output video file")
     args = parser.parse_args()
-    check_input(args.input)
-    make_vertical(args.input, args.output)
+    check_file(args.input)
+    vertical_clips(args.input, args.output)
